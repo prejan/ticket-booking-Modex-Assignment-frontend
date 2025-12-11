@@ -1,30 +1,34 @@
-const BASE = process.env.REACT_APP_API_URL || "ticket-booking-modex-assignment-production.up.railway.app";
+const BASE =
+  process.env.REACT_APP_API_URL ||
+  "https://ticket-booking-modex-assignment-production.up.railway.app";
 
-export async function fetchJSON(path: string, opts: RequestInit = {}) {
+export async function fetchJSON(
+  path: string,
+  opts: { body?: any } & RequestInit = {}
+) {
   const url = `${BASE}/api${path}`;
 
   const headers = {
     "Content-Type": "application/json",
-    ...(opts.headers || {})
+    ...(opts.headers || {}),
   };
 
   let body = opts.body;
 
-  // Convert JSON object → string
   if (body && typeof body !== "string") {
     body = JSON.stringify(body);
   }
 
-  const response = await fetch(url, {
+  const res = await fetch(url, {
     ...opts,
     headers,
-    body
+    body,
   });
 
-  const data = await response.json().catch(() => null);
+  const data = await res.json().catch(() => null);
 
-  if (!response.ok) {
-    throw new Error(data?.message || response.statusText);
+  if (!res.ok) {
+    throw new Error(data?.message || res.statusText);
   }
 
   return data;
