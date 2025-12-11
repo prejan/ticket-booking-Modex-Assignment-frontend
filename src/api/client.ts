@@ -6,9 +6,14 @@ export async function fetchJSON(path: string, opts: RequestInit = {}) {
     headers: { 'Content-Type': 'application/json' },
     ...opts
   };
-  if (merged.body && typeof merged.body !== 'string') {
+ if (merged.body && typeof merged.body !== "string") {
     merged.body = JSON.stringify(merged.body);
   }
+  merged.headers = {
+    ...(merged.headers || {}),
+    "Content-Type": "application/json",
+  };
+
   const res = await fetch(url, merged);
   const json = await res.json().catch(() => null);
   if (!res.ok) {
