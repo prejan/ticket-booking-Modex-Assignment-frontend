@@ -1,0 +1,8 @@
+body { font-family: Arial, Helvetica, sans-serif; margin: 0; padding: 0; }
+.header { background:#111; color:white; padding:12px 18px; }
+.header a { color:#ddd; margin-right:8px; text-decoration:none; }
+.container { padding: 18px; }
+.seat-grid { display: grid; grid-template-columns: repeat(10, 40px); gap:8px; max-width: 440px; }
+.seat { height: 40px; border-radius:6px; border:1px solid #999; background: #f7f7f7; cursor:pointer; }
+.seat.booked { background:#ccc; cursor:not-allowed; }
+.seat.selected { background:#8fd3a2; }
