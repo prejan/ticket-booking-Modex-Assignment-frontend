@@ -1,6 +1,6 @@
 const BASE =
   process.env.REACT_APP_API_URL ||
-  "https://ticket-booking-modex-assignment-production.up.railway.app";
+  "ticket-booking-modex-assignment-production.up.railway.app";
 
 export async function fetchJSON(
   path: string,
