@@ -4,7 +4,7 @@ const BASE =
 
 export async function fetchJSON(
   path: string,
-  opts: { body?: any } & RequestInit = {}
+  opts: any = {}       // <-- FIXED HERE (VERY IMPORTANT)
 ) {
   const url = `${BASE}/api${path}`;
 
