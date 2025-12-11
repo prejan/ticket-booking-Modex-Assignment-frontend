@@ -1,34 +1,29 @@
-const BASE =
-  process.env.REACT_APP_API_URL || "https://ticket-booking-modex-assignment-production.up.railway.app";
+// src/api/clients.ts
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://ticket-booking-modex-assignment-production.up.railway.app';
 
-export async function fetchJSON(
-  path: string,
-  opts: any = {}       // <-- FIXED HERE (VERY IMPORTANT)
-) {
-  const url = `${BASE}/api${path}`;
-
-  const headers = {
-    "Content-Type": "application/json",
-    ...(opts.headers || {}),
-  };
-
-  let body = opts.body;
-
-  if (body && typeof body !== "string") {
-    body = JSON.stringify(body);
-  }
-
-  const res = await fetch(url, {
-    ...opts,
-    headers,
-    body,
-  });
-
-  const data = await res.json().catch(() => null);
-
-  if (!res.ok) {
-    throw new Error(data?.message || res.statusText);
-  }
-
-  return data;
-}
+export const apiClient = {
+  async get(endpoint: string) {
+    const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+    return response.json();
+  },
+  
+  async post(endpoint: string, data: any) {
+    const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(data),
+    });
+    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+    return response.json();
+  },
+  
+  // Add other methods as needed (PUT, DELETE, etc.)
+};
