@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Ultra Premium Ticket Booking – Modex</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+
+<style>
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: "Poppins", sans-serif;
+  }
+
+  body {
+    background: radial-gradient(circle at top, #0f0c29, #302b63, #24243e);
+    min-height: 100vh;
+    color: #fff;
+  }
+
+  header {
+    padding: 28px;
+    text-align: center;
+    font-size: 38px;
+    font-weight: 700;
+    background: linear-gradient(135deg, rgba(255,0,150,0.4), rgba(0,200,255,0.4));
+    backdrop-filter: blur(12px);
+    border-bottom: 2px solid rgba(255,255,255,0.15);
+    letter-spacing: 1.5px;
+    box-shadow: 0 0 30px rgba(0,0,0,0.5);
+  }
+
+  .container {
+    max-width: 1200px;
+    margin: auto;
+    padding: 30px;
+  }
+
+  .card {
+    background: rgba(255,255,255,0.08);
+    border-radius: 18px;
+    padding: 25px;
+    margin-top: 30px;
+    backdrop-filter: blur(15px);
+    box-shadow: 0 0 25px rgba(0,0,0,0.3);
+    transition: 0.3s;
+  }
+
+  .card:hover {
+    transform: translateY(-7px);
+    box-shadow: 0 0 40px rgba(255,0,120,0.3);
+  }
+
+  h2 {
+    margin-bottom: 20px;
+    font-weight: 600;
+    text-shadow: 0 0 12px rgba(255,255,255,0.5);
+  }
+
+  input, select {
+    width: 100%;
+    padding: 14px;
+    margin-bottom: 20px;
+    border-radius: 10px;
+    border: none;
+    outline: none;
+  }
+
+  button {
+    width: 100%;
+    padding: 15px;
+    font-size: 17px;
+    font-weight: 600;
+    color: white;
+    background: linear-gradient(90deg, #ff5f6d, #ffc371);
+    border-radius: 12px;
+    border: none;
+    cursor: pointer;
+    transition: 0.25s;
+    box-shadow: 0 0 15px rgba(255,100,100,0.5);
+  }
+
+  button:hover {
+    transform: scale(1.05);
+    box-shadow: 0 0 25px rgba(255,150,150,0.8);
+  }
+
+  /* ---------- SEAT MAP ----------- */
+  .seat-map {
+    margin-top: 20px;
+    display: grid;
+    grid-template-columns: repeat(10, 1fr);
+    gap: 12px;
+    justify-items: center;
+  }
+
+  .seat {
+    width: 32px;
+    height: 32px;
+    background: rgba(255,255,255,0.25);
+    border-radius: 8px;
+    cursor: pointer;
+    transition: 0.2s;
+    box-shadow: 0 0 10px rgba(255,255,255,0.2);
+  }
+
+  .seat:hover {
+    background: #fff;
+    transform: scale(1.1);
+  }
+
+  .seat.selected {
+    background: #00e676;
+    box-shadow: 0 0 12px #00e676;
+    transform: scale(1.1);
+  }
+
+  .seat.booked {
+    background: #ff1744;
+    box-shadow: 0 0 12px #ff1744;
+    cursor: not-allowed;
+  }
+
+  /* Booking Item */
+  .booking {
+    background: rgba(255,255,255,0.2);
+    padding: 12px;
+    border-radius: 12px;
+    margin-bottom: 12px;
+    animation: fadeIn 0.4s;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+</style>
+</head>
+
+<body>
+
+<header>🎬 Ultra Premium Ticket Booking Demo</header>
+
+<div class="container">
+
+  <!-- CREATE SHOW -->
+  <div class="card">
+    <h2>➕ Create Movie Show</h2>
+    <input id="showName" placeholder="Show Name (ex: Leo, Jailer)">
+    <input id="showTime" placeholder="Show Time (ex: 2025-12-12T10:00:00Z)">
+    <input id="totalSeats" type="number" placeholder="Total Seats (ex: 80)">
+    <button onclick="createShow()">Create Show</button>
+  </div>
+
+  <!-- SHOW LIST -->
+  <div class="card">
+    <h2>🎥 Available Shows</h2>
+    <div id="showsList">No shows yet.</div>
+  </div>
+
+  <!-- SEAT BOOKING -->
+  <div class="card">
+    <h2>🎟 Book Seats</h2>
+    <select id="showSelect" onchange="renderSeatMap()"></select>
+
+    <h3 style="margin-top: 20px;">Select Seats:</h3>
+    <div id="seatMap" class="seat-map"></div>
+
+    <button onclick="finalizeBooking()">Confirm Booking</button>
+  </div>
+
+  <!-- BOOKING SUMMARY -->
+  <div class="card">
+    <h2>📄 Booking Summary</h2>
+    <div id="bookingList">No bookings yet.</div>
+  </div>
+
+</div>
+
+<script>
+  let shows = [];
+  let bookings = [];
+  let selectedSeats = [];
+
+  function refreshUI() {
+    const showList = document.getElementById("showsList");
+    const showSelect = document.getElementById("showSelect");
+    showList.innerHTML = "";
+    showSelect.innerHTML = "";
+
+    if (shows.length === 0) {
+      showList.innerHTML = "<p>No shows yet.</p>";
+      return;
+    }
+
+    shows.forEach((s, i) => {
+      showList.innerHTML += `
+        <div class="booking">
+          🎬 <b>${s.name}</b><br>
+          🕒 ${s.time}<br>
+          💺 Available Seats: ${s.seats.filter(x => !x).length}
+        </div>
+      `;
+      showSelect.innerHTML += `<option value="${i}">${s.name}</option>`;
+    });
+
+    renderSeatMap();
+    loadBookings();
+  }
+
+  function createShow() {
+    const name = document.getElementById("showName").value;
+    const time = document.getElementById("showTime").value;
+    const totalSeats = parseInt(document.getElementById("totalSeats").value);
+
+    if (!name || !time || totalSeats < 1) {
+      alert("Enter valid show details!");
+      return;
+    }
+
+    shows.push({
+      name,
+      time,
+      seats: Array(totalSeats).fill(false)  // false = available
+    });
+
+    alert("Show Created Successfully!");
+    refreshUI();
+  }
+
+  function renderSeatMap() {
+    const showIndex = document.getElementById("showSelect").value;
+    if (showIndex === "") return;
+
+    const seatMap = document.getElementById("seatMap");
+    seatMap.innerHTML = "";
+    selectedSeats = [];
+
+    shows[showIndex].seats.forEach((isBooked, index) => {
+      const seat = document.createElement("div");
+      seat.className = "seat";
+
+      if (isBooked) seat.classList.add("booked");
+
+      seat.onclick = () => {
+        if (seat.classList.contains("booked")) return;
+
+        seat.classList.toggle("selected");
+
+        if (selectedSeats.includes(index)) {
+          selectedSeats = selectedSeats.filter(s => s !== index);
+        } else {
+          selectedSeats.push(index);
+        }
+      };
+
+      seatMap.appendChild(seat);
+    });
+  }
+
+  function finalizeBooking() {
+    const showIndex = document.getElementById("showSelect").value;
+
+    if (selectedSeats.length === 0) {
+      alert("Please select seats!");
+      return;
+    }
+
+    selectedSeats.forEach(seatIndex => {
+      shows[showIndex].seats[seatIndex] = true;
+    });
+
+    bookings.push({
+      show: shows[showIndex].name,
+      seats: [...selectedSeats]
+    });
+
+    alert("🎉 Booking Confirmed!");
+    refreshUI();
+  }
+
+  function loadBookings() {
+    const bookingList = document.getElementById("bookingList");
+    bookingList.innerHTML = "";
+
+    if (bookings.length === 0) {
+      bookingList.innerHTML = "<p>No bookings yet.</p>";
+      return;
+    }
+
+    bookings.forEach(b => {
+      bookingList.innerHTML += `
+        <div class="booking">
+          🎟 <b>${b.show}</b><br>
+          Seats: ${b.seats.join(", ")}
+        </div>
+      `;
+    });
+  }
+
+</script>
+
+</body>
+</html>
